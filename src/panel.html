@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Backups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Animaciones personalizadas */
+      .progress-bar {
+        transition: width 0.3s ease-in-out;
+      }
+
+      .tab-transition {
+        transition: all 0.2s ease-in-out;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+
+      /* Switch personalizado */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 24px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: #2563eb;
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+
+      /* Ocultar contenido de tabs */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div class="min-h-screen p-6 pb-20">
+      <div class="max-w-6xl mx-auto space-y-6">
+        <!-- Header -->
+        <div
+          class="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+        >
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Sistema de Backups</h1>
+            <p class="text-gray-600 mt-1">
+              Gestiona y automatiza tus copias de seguridad
+            </p>
+          </div>
+          <div
+            class="flex flex-col sm:flex-row items-start sm:items-center gap-4"
+          >
+            <div class="flex items-center gap-2">
+              <label class="switch">
+                <input type="checkbox" id="backupToggle" checked />
+                <span class="slider"></span>
+              </label>
+              <span class="text-sm font-medium text-gray-700"
+                >Backups automáticos</span
+              >
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="userWelcome" class="text-sm text-gray-600"></span>
+              <button
+                id="logoutBtn"
+                class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                title="Cerrar sesión"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  ></path>
+                </svg>
+                <span class="hidden sm:inline">Salir</span>
+              </button>
+            </div>
+            <button
+              id="startBackupBtn"
+              class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span id="backupBtnText">Iniciar Backup</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover-scale"
+          >
+            <div class="flex items-center gap-4">
+              <div class="p-2 bg-green-100 rounded-lg">
+                <svg
+                  class="w-6 h-6 text-green-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Último Backup</p>
+                <p class="text-lg font-semibold text-gray-900">Hace 2 horas</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover-scale"
+          >
+            <div class="flex items-center gap-4">
+              <div class="p-2 bg-blue-100 rounded-lg">
+                <svg
+                  class="w-6 h-6 text-blue-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Tamaño Total</p>
+                <p class="text-lg font-semibold text-gray-900">11.4 GB</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover-scale"
+          >
+            <div class="flex items-center gap-4">
+              <div class="p-2 bg-purple-100 rounded-lg">
+                <svg
+                  class="w-6 h-6 text-purple-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Destino</p>
+                <p class="text-lg font-semibold text-gray-900">Google Drive</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover-scale"
+          >
+            <div class="flex items-center gap-4">
+              <div class="p-2 bg-orange-100 rounded-lg">
+                <svg
+                  class="w-6 h-6 text-orange-600"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Frecuencia</p>
+                <p class="text-lg font-semibold text-gray-900">Diario</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div
+          id="progressContainer"
+          class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden"
+        >
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-gray-900">
+                Backup en progreso...
+              </h3>
+              <span id="progressText" class="text-sm text-gray-600">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div
+                id="progressBar"
+                class="bg-blue-600 h-2 rounded-full progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <p class="text-sm text-gray-600">
+              Comprimiendo archivos y subiendo a Google Drive...
+            </p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="space-y-6">
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="tab-btn tab-transition flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-blue-600 text-white shadow-md"
+              data-tab="folders"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                />
+              </svg>
+              Carpetas
+            </button>
+            <button
+              class="tab-btn tab-transition flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              data-tab="schedule"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Programación
+            </button>
+            <button
+              class="tab-btn tab-transition flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              data-tab="storage"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"
+                />
+              </svg>
+              Almacenamiento
+            </button>
+            <button
+              class="tab-btn tab-transition flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+              data-tab="history"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Historial
+            </button>
+          </div>
+
+          <!-- Folders Tab -->
+          <div
+            id="folders"
+            class="tab-content active bg-white rounded-lg shadow-sm border border-gray-200"
+          >
+            <div class="p-6 border-b border-gray-200">
+              <div
+                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    Carpetas para Backup
+                  </h2>
+                  <p class="text-gray-600 mt-1">
+                    Selecciona las carpetas que deseas incluir en tus backups
+                    automáticos
+                  </p>
+                </div>
+                <button
+                  class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Agregar Carpeta
+                </button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="space-y-4">
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <svg
+                      class="w-8 h-8 text-blue-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                      />
+                    </svg>
+                    <div>
+                      <p class="font-medium text-gray-900">/Users/Documents</p>
+                      <p class="text-sm text-gray-600">
+                        2.3 GB • Último backup: 2024-01-15 14:30
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                      >Activo</span
+                    >
+                    <button
+                      class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      class="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <svg
+                      class="w-8 h-8 text-blue-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                      />
+                    </svg>
+                    <div>
+                      <p class="font-medium text-gray-900">/Users/Pictures</p>
+                      <p class="text-sm text-gray-600">
+                        8.7 GB • Último backup: 2024-01-15 14:30
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                      >Activo</span
+                    >
+                    <button
+                      class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      class="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <svg
+                      class="w-8 h-8 text-blue-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                      />
+                    </svg>
+                    <div>
+                      <p class="font-medium text-gray-900">/Projects/WebApp</p>
+                      <p class="text-sm text-gray-600">
+                        450 MB • Último backup: 2024-01-15 14:30
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                      >Activo</span
+                    >
+                    <button
+                      class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      class="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Tab -->
+          <div
+            id="schedule"
+            class="tab-content bg-white rounded-lg shadow-sm border border-gray-200"
+          >
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-xl font-semibold text-gray-900">
+                Programación de Backups
+              </h2>
+              <p class="text-gray-600 mt-1">
+                Configura cuándo y con qué frecuencia se realizarán los backups
+                automáticos
+              </p>
+            </div>
+            <div class="p-6 space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Frecuencia</label
+                  >
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="hourly">Cada hora</option>
+                    <option value="daily" selected>Diario</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensual</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Hora de ejecución</label
+                  >
+                  <input
+                    type="time"
+                    value="14:30"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Retención de backups</label
+                  >
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="7">7 días</option>
+                    <option value="30" selected>30 días</option>
+                    <option value="90">90 días</option>
+                    <option value="365">1 año</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Nivel de compresión</label
+                  >
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="low">Bajo (rápido)</option>
+                    <option value="medium" selected>Medio</option>
+                    <option value="high">Alto (lento)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Opciones avanzadas
+                </h3>
+
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <label class="text-sm font-medium text-gray-700"
+                        >Verificar integridad después del backup</label
+                      >
+                      <p class="text-sm text-gray-600">
+                        Comprueba que los archivos se copiaron correctamente
+                      </p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <label class="text-sm font-medium text-gray-700"
+                        >Notificaciones por email</label
+                      >
+                      <p class="text-sm text-gray-600">
+                        Recibe alertas sobre el estado de los backups
+                      </p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" checked />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <label class="text-sm font-medium text-gray-700"
+                        >Backup incremental</label
+                      >
+                      <p class="text-sm text-gray-600">
+                        Solo respalda archivos modificados
+                      </p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Storage Tab -->
+          <div
+            id="storage"
+            class="tab-content bg-white rounded-lg shadow-sm border border-gray-200"
+          >
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-xl font-semibold text-gray-900">
+                Configuración de Almacenamiento
+              </h2>
+              <p class="text-gray-600 mt-1">
+                Configura dónde se almacenarán tus backups en la nube
+              </p>
+            </div>
+            <div class="p-6 space-y-6">
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Proveedor de almacenamiento</label
+                >
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="gdrive" selected>Google Drive</option>
+                  <option value="dropbox">Dropbox</option>
+                  <option value="onedrive">OneDrive</option>
+                  <option value="aws">Amazon S3</option>
+                  <option value="custom">Servidor personalizado</option>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700"
+                  >Carpeta de destino</label
+                >
+                <input
+                  type="text"
+                  placeholder="/Backups/MiApp"
+                  value="/Backups/MiApp"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Email de la cuenta</label
+                  >
+                  <input
+                    type="email"
+                    placeholder="usuario@gmail.com"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700"
+                    >Estado de conexión</label
+                  >
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                    >
+                      <svg
+                        class="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      Conectado
+                    </span>
+                    <button
+                      class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Reconectar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Configuración avanzada
+                </h3>
+
+                <div class="space-y-4">
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                      <label class="switch">
+                        <input type="checkbox" checked />
+                        <span class="slider"></span>
+                      </label>
+                      <span class="text-sm font-medium text-gray-700"
+                        >Cifrado de archivos</span
+                      >
+                    </div>
+                    <p class="text-sm text-gray-600 ml-12">
+                      Los backups se cifrarán antes de subirse
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700"
+                      >Límite de ancho de banda (MB/s)</label
+                    >
+                    <input
+                      type="number"
+                      placeholder="10"
+                      value="10"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Tab -->
+          <div
+            id="history"
+            class="tab-content bg-white rounded-lg shadow-sm border border-gray-200"
+          >
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-xl font-semibold text-gray-900">
+                Historial de Backups
+              </h2>
+              <p class="text-gray-600 mt-1">
+                Revisa el historial completo de tus backups realizados
+              </p>
+            </div>
+            <div class="p-6">
+              <div class="space-y-4">
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                      <svg
+                        class="w-5 h-5 text-green-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900">2024-01-15 14:30</p>
+                      <p class="text-sm text-gray-600">
+                        11.4 GB • Google Drive
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                      >Exitoso</span
+                    >
+                    <button
+                      class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                      <svg
+                        class="w-5 h-5 text-green-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900">2024-01-14 14:30</p>
+                      <p class="text-sm text-gray-600">
+                        11.2 GB • Google Drive
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                      >Exitoso</span
+                    >
+                    <button
+                      class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <div class="p-2 bg-red-100 rounded-lg">
+                      <svg
+                        class="w-5 h-5 text-red-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900">2024-01-13 14:30</p>
+                      <p class="text-sm text-gray-600">
+                        11.1 GB • Google Drive
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full"
+                      >Fallido</span
+                    >
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-4">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                      <svg
+                        class="w-5 h-5 text-green-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900">2024-01-12 14:30</p>
+                      <p class="text-sm text-gray-600">10.9 GB • Dropbox</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                      >Exitoso</span
+                    >
+                    <button
+                      class="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- powered by Clicfstudios -->
+
+      <div class="text-center text-gray-500 text-sm mt-8">
+        Powered by
+        <a href="https://clicfstudios.com" class="text-blue-600 hover:underline"
+          >Clicfstudios</a
+        >
+      </div>
+    </div>
+
+    <script>
+      // Variables globales
+      let isBackingUp = false;
+      let backupProgress = 0;
+      let progressInterval;
+      let currentUser = null;
+      let backupFolders = [];
+      let backupHistory = [];
+      let backupStats = {};
+
+      // Elementos del DOM
+      const startBackupBtn = document.getElementById("startBackupBtn");
+      const backupBtnText = document.getElementById("backupBtnText");
+      const progressContainer = document.getElementById("progressContainer");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      const tabContents = document.querySelectorAll(".tab-content");
+
+      // Inicialización
+      document.addEventListener("DOMContentLoaded", async function () {
+        await initializeApp();
+      });
+
+      // Inicializar la aplicación
+      async function initializeApp() {
+        try {
+          // Verificar autenticación
+          const isAuth = await window.electronAPI.isAuthenticated();
+          if (!isAuth) {
+            window.electronAPI.navigateToLogin();
+            return;
+          }
+
+          // Obtener usuario actual
+          currentUser = await window.electronAPI.getCurrentUser();
+          if (!currentUser) {
+            window.electronAPI.navigateToLogin();
+            return;
+          }
+
+          // Cargar datos
+          await loadDashboardData();
+
+          // Configurar event listeners
+          setupEventListeners();
+
+          console.log("Sistema de Backups cargado correctamente");
+        } catch (error) {
+          console.error("Error inicializando aplicación:", error);
+          showNotification("Error al cargar la aplicación", "error");
+        }
+      }
+
+      // Cargar datos del dashboard
+      async function loadDashboardData() {
+        try {
+          // Cargar carpetas de backup
+          backupFolders = await window.electronAPI.getUserBackupFolders();
+          renderBackupFolders();
+
+          // Cargar historial
+          backupHistory = await window.electronAPI.getBackupHistory(20);
+          renderBackupHistory();
+
+          // Cargar estadísticas
+          backupStats = await window.electronAPI.getBackupStats();
+          renderBackupStats();
+
+          // Mostrar bienvenida al usuario
+          document.getElementById(
+            "userWelcome"
+          ).textContent = `Bienvenido, ${currentUser.username}`;
+        } catch (error) {
+          console.error("Error cargando datos:", error);
+          showNotification("Error al cargar los datos", "error");
+        }
+      }
+
+      // Configurar event listeners
+      function setupEventListeners() {
+        // Botón de backup
+        startBackupBtn.addEventListener("click", handleStartBackup);
+
+        // Botón de logout
+        document
+          .getElementById("logoutBtn")
+          .addEventListener("click", handleLogout);
+
+        // Tabs
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const targetTab = button.getAttribute("data-tab");
+            switchTab(targetTab);
+          });
+        });
+      }
+
+      // Renderizar carpetas de backup
+      function renderBackupFolders() {
+        const container = document.querySelector(
+          "#folders .p-6:last-child .space-y-4"
+        );
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (backupFolders.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8">
+              <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No hay carpetas configuradas</h3>
+              <p class="text-gray-600 mb-4">Agrega tu primera carpeta para comenzar a hacer backups</p>
+              <button onclick="addNewFolder()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Agregar Carpeta
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        backupFolders.forEach((folder) => {
+          const folderElement = document.createElement("div");
+          folderElement.className =
+            "flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors";
+          folderElement.innerHTML = `
+            <div class="flex items-center gap-4">
+              <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+              </svg>
+              <div>
+                <p class="font-medium text-gray-900">${
+                  folder.folder_name || folder.folder_path
+                }</p>
+                <p class="text-sm text-gray-600">
+                  ${formatFileSize(folder.total_size_bytes || 0)} • ${
+            folder.file_count || 0
+          } archivos
+                  ${
+                    folder.last_backup_date
+                      ? `• Último backup: ${formatDate(
+                          folder.last_backup_date
+                        )}`
+                      : ""
+                  }
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs font-medium ${
+                folder.is_active
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-800"
+              } rounded-full">
+                ${folder.is_active ? "Activo" : "Inactivo"}
+              </span>
+              <button onclick="editFolder(${
+                folder.id
+              })" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <button onclick="removeFolder(${
+                folder.id
+              })" class="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          `;
+          container.appendChild(folderElement);
+        });
+      }
+
+      // Renderizar historial de backups
+      function renderBackupHistory() {
+        const container = document.querySelector(
+          "#history .p-6:last-child .space-y-4"
+        );
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (backupHistory.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8">
+              <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No hay backups realizados</h3>
+              <p class="text-gray-600">El historial aparecerá aquí cuando realices tu primer backup</p>
+            </div>
+          `;
+          return;
+        }
+
+        backupHistory.forEach((backup) => {
+          const statusColor =
+            backup.status === "completed"
+              ? "green"
+              : backup.status === "failed"
+              ? "red"
+              : "yellow";
+          const statusText =
+            backup.status === "completed"
+              ? "Exitoso"
+              : backup.status === "failed"
+              ? "Fallido"
+              : "En progreso";
+          const statusIcon =
+            backup.status === "completed"
+              ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>'
+              : backup.status === "failed"
+              ? '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>'
+              : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>';
+
+          const historyElement = document.createElement("div");
+          historyElement.className =
+            "flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors";
+          historyElement.innerHTML = `
+            <div class="flex items-center gap-4">
+              <div class="p-2 bg-${statusColor}-100 rounded-lg">
+                <svg class="w-5 h-5 text-${statusColor}-600" fill="currentColor" viewBox="0 0 20 20">
+                  ${statusIcon}
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">${formatDate(
+                  backup.created_at
+                )}</p>
+                <p class="text-sm text-gray-600">
+                  ${
+                    backup.total_size_bytes
+                      ? formatFileSize(backup.total_size_bytes)
+                      : "0 B"
+                  } • ${backup.storage_name || "Almacenamiento local"}
+                  ${
+                    backup.error_message
+                      ? `• Error: ${backup.error_message}`
+                      : ""
+                  }
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800 rounded-full">
+                ${statusText}
+              </span>
+              ${
+                backup.status === "completed"
+                  ? `
+                <button onclick="downloadBackup(${backup.id})" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              `
+                  : ""
+              }
+            </div>
+          `;
+          container.appendChild(historyElement);
+        });
+      }
+
+      // Renderizar estadísticas
+      function renderBackupStats() {
+        // Actualizar tarjetas de estadísticas
+        const statsCards = document.querySelectorAll(".hover-scale");
+        if (statsCards.length >= 4) {
+          // Último backup
+          const lastBackupCard = statsCards[0].querySelector("p:last-child");
+          if (backupStats.lastBackup) {
+            lastBackupCard.textContent = `${formatDate(
+              backupStats.lastBackup.completed_at
+            )}`;
+          } else {
+            lastBackupCard.textContent = "No realizado";
+          }
+
+          // Tamaño total
+          const totalSizeCard = statsCards[1].querySelector("p:last-child");
+          totalSizeCard.textContent = formatFileSize(backupStats.totalSize);
+
+          // Estadísticas adicionales se pueden agregar aquí
+        }
+      }
+
+      // Manejar logout
+      async function handleLogout() {
+        try {
+          await window.electronAPI.logout();
+          window.electronAPI.navigateToLogin();
+        } catch (error) {
+          console.error("Error during logout:", error);
+          showNotification("Error al cerrar sesión", "error");
+        }
+      }
+
+      // Manejar inicio de backup
+      async function handleStartBackup() {
+        if (isBackingUp) return;
+
+        try {
+          const result = await window.electronAPI.startBackup();
+
+          if (result.success) {
+            startBackupProcess(result.jobId);
+          } else {
+            showNotification(
+              result.error || "Error al iniciar backup",
+              "error"
+            );
+          }
+        } catch (error) {
+          console.error("Error starting backup:", error);
+          showNotification("Error al iniciar backup", "error");
+        }
+      }
+
+      // Iniciar proceso de backup
+      function startBackupProcess(jobId) {
+        isBackingUp = true;
+        backupProgress = 0;
+
+        // Actualizar UI
+        startBackupBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+        startBackupBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+        backupBtnText.textContent = "Backup en progreso...";
+        progressContainer.classList.remove("hidden");
+
+        // Monitorear progreso
+        const progressInterval = setInterval(async () => {
+          try {
+            const jobStatus = await window.electronAPI.getBackupJobStatus(
+              jobId
+            );
+
+            if (jobStatus) {
+              backupProgress = jobStatus.progress_percentage || 0;
+              progressBar.style.width = backupProgress + "%";
+              progressText.textContent = backupProgress + "%";
+
+              // Actualizar operación actual
+              const progressDescription = progressContainer.querySelector("p");
+              if (jobStatus.current_operation) {
+                progressDescription.textContent = jobStatus.current_operation;
+              }
+
+              if (
+                jobStatus.status === "completed" ||
+                jobStatus.status === "failed"
+              ) {
+                clearInterval(progressInterval);
+
+                if (jobStatus.status === "completed") {
+                  showNotification("Backup completado exitosamente", "success");
+                } else {
+                  showNotification(
+                    jobStatus.error_message || "Error en el backup",
+                    "error"
+                  );
+                }
+
+                // Recargar datos
+                await loadDashboardData();
+
+                setTimeout(() => {
+                  resetBackupUI();
+                }, 2000);
+              }
+            }
+          } catch (error) {
+            console.error("Error monitoring backup:", error);
+            clearInterval(progressInterval);
+            resetBackupUI();
+          }
+        }, 1000);
+      }
+
+      // Resetear UI del backup
+      function resetBackupUI() {
+        isBackingUp = false;
+        backupProgress = 0;
+
+        startBackupBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+        startBackupBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+        backupBtnText.textContent = "Iniciar Backup";
+        progressContainer.classList.add("hidden");
+      }
+
+      // Agregar nueva carpeta
+      async function addNewFolder() {
+        try {
+          const result = await window.electronAPI.selectFolder();
+
+          if (!result.canceled && result.filePaths.length > 0) {
+            const folderPath = result.filePaths[0];
+            const folderName = folderPath.split(/[\\/]/).pop();
+
+            const addResult = await window.electronAPI.addBackupFolder(
+              folderPath,
+              folderName
+            );
+
+            if (addResult.success) {
+              showNotification("Carpeta agregada exitosamente", "success");
+              await loadDashboardData();
+            } else {
+              showNotification(
+                addResult.error || "Error al agregar carpeta",
+                "error"
+              );
+            }
+          }
+        } catch (error) {
+          console.error("Error adding folder:", error);
+          showNotification("Error al agregar carpeta", "error");
+        }
+      }
+
+      // Funciones auxiliares
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB", "TB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return "N/A";
+        return new Date(dateString).toLocaleString("es-ES");
+      }
+
+      function showNotification(message, type = "info") {
+        const notification = document.createElement("div");
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          type === "success"
+            ? "bg-green-500"
+            : type === "error"
+            ? "bg-red-500"
+            : "bg-blue-500"
+        } text-white`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 5000);
+      }
+
+      // Función para cambiar tabs
+      function switchTab(targetTab) {
+        // Remover clase activa de todos los botones y contenidos
+        tabButtons.forEach((btn) => {
+          btn.classList.remove("bg-blue-600", "text-white", "shadow-md");
+          btn.classList.add(
+            "bg-white",
+            "text-gray-600",
+            "hover:bg-gray-50",
+            "border",
+            "border-gray-200"
+          );
+        });
+
+        tabContents.forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        // Activar el tab seleccionado
+        const activeButton = document.querySelector(
+          `[data-tab="${targetTab}"]`
+        );
+        const activeContent = document.getElementById(targetTab);
+
+        if (activeButton && activeContent) {
+          activeButton.classList.add("bg-blue-600", "text-white", "shadow-md");
+          activeButton.classList.remove(
+            "bg-white",
+            "text-gray-600",
+            "hover:bg-gray-50",
+            "border",
+            "border-gray-200"
+          );
+
+          activeContent.classList.add("active");
+        }
+      }
+
+      // Funciones placeholder
+      function editFolder(folderId) {
+        showNotification("Función de edición en desarrollo", "info");
+      }
+
+      function removeFolder(folderId) {
+        showNotification("Función de eliminación en desarrollo", "info");
+      }
+
+      function downloadBackup(backupId) {
+        showNotification("Función de descarga en desarrollo", "info");
+      }
+
+      // Agregar botón de "Agregar Carpeta" al DOM
+      document.addEventListener("DOMContentLoaded", function () {
+        const addFolderBtn = document.querySelector("#folders button");
+        if (addFolderBtn) {
+          addFolderBtn.addEventListener("click", addNewFolder);
+        }
+
+        // Cargar la versión de la aplicación
+        window.electronAPI
+          .getAppVersion()
+          .then((version) => {
+            document.getElementById("app-version").textContent = `v${version}`;
+          })
+          .catch(() => {
+            document.getElementById("app-version").textContent = "v1.0.0";
+          });
+      });
+    </script>
+
+    <!-- Footer con versión y créditos -->
+    <footer
+      class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-3 text-center text-sm z-50"
+    >
+      <div class="flex justify-between items-center max-w-6xl mx-auto">
+        <div id="app-version" class="text-gray-400">v1.0.0</div>
+        <div class="text-gray-400">
+          Powered By
+          <span class="text-blue-400 font-semibold">Clicfstudios</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

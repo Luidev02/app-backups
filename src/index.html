@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Sistema de Backups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .form-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        outline: none;
+      }
+
+      .login-bg {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      .login-animation {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .error-shake {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        20%,
+        80% {
+          transform: translate3d(2px, 0, 0);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translate3d(-3px, 0, 0);
+        }
+        40%,
+        60% {
+          transform: translate3d(3px, 0, 0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-50 login-bg min-h-screen flex items-center justify-center p-4 pb-20"
+  >
+    <div class="login-animation w-full max-w-md">
+      <!-- Logo y título -->
+      <div class="text-center mb-8">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 text-white mb-4"
+        >
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"
+            />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900">Sistema de Backups</h1>
+        <p class="text-gray-600 mt-2">
+          Inicia sesión para gestionar tus copias de seguridad
+        </p>
+      </div>
+
+      <!-- Tarjeta de login -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Pestañas (si quieres añadir registro) -->
+        <div class="flex border-b border-gray-200">
+          <button
+            class="flex-1 py-4 px-6 text-center bg-white text-blue-600 font-medium border-b-2 border-blue-600"
+          >
+            Iniciar Sesión
+          </button>
+          <button
+            class="flex-1 py-4 px-6 text-center text-gray-500 font-medium hover:bg-gray-50 transition-colors"
+          >
+            Registrarse
+          </button>
+        </div>
+
+        <!-- Formulario -->
+        <div class="p-6">
+          <form id="loginForm" class="space-y-6">
+            <!-- Mensaje de error -->
+            <div
+              id="errorMessage"
+              class="hidden bg-red-50 text-red-600 p-3 rounded-md text-sm"
+            ></div>
+
+            <!-- Campo de usuario -->
+            <div class="space-y-2">
+              <label
+                for="username"
+                class="block text-sm font-medium text-gray-700"
+                >Usuario o Email</label
+              >
+              <input
+                type="text"
+                id="username"
+                name="username"
+                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Ingresa tu usuario o email"
+                required
+              />
+            </div>
+
+            <!-- Campo de contraseña -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label
+                  for="password"
+                  class="block text-sm font-medium text-gray-700"
+                  >Contraseña</label
+                >
+                <a
+                  href="#"
+                  class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                  >¿Olvidaste tu contraseña?</a
+                >
+              </div>
+              <div class="relative">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Ingresa tu contraseña"
+                  required
+                />
+                <button
+                  type="button"
+                  id="togglePassword"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Recordarme -->
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="remember"
+                name="remember"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label for="remember" class="ml-2 block text-sm text-gray-700">
+                Recordar mi sesión
+              </label>
+            </div>
+
+            <!-- Botón de login -->
+            <div>
+              <button
+                type="submit"
+                id="loginButton"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <span id="buttonText">Iniciar Sesión</span>
+                <svg
+                  id="loadingIcon"
+                  class="animate-spin ml-2 h-5 w-5 text-white hidden"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-6">
+        <p class="text-sm text-gray-600">
+          © 2024 Sistema de Backups. Todos los derechos reservados.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const loginForm = document.getElementById("loginForm");
+        const errorMessage = document.getElementById("errorMessage");
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+        const loginButton = document.getElementById("loginButton");
+        const buttonText = document.getElementById("buttonText");
+        const loadingIcon = document.getElementById("loadingIcon");
+
+        // Mostrar/ocultar contraseña
+        togglePassword.addEventListener("click", function () {
+          const type =
+            passwordInput.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          passwordInput.setAttribute("type", type);
+
+          // Cambiar el icono
+          const icon = togglePassword.querySelector("svg");
+          if (type === "text") {
+            icon.innerHTML =
+              '<path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />';
+          } else {
+            icon.innerHTML =
+              '<path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />';
+          }
+        });
+
+        // Validación del formulario
+        loginForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const username = document.getElementById("username").value.trim();
+          const password = passwordInput.value;
+
+          // Validación básica
+          if (!username || !password) {
+            showError("Por favor completa todos los campos");
+            return;
+          }
+
+          // Mostrar estado de carga
+          setLoading(true);
+
+          try {
+            const result = await window.electronAPI.login(username, password);
+
+            if (result.success) {
+              // Login exitoso - navegar al panel
+              await window.electronAPI.navigateToPanel();
+            } else {
+              showError(result.error || "Error en el inicio de sesión");
+            }
+          } catch (error) {
+            showError("Error de conexión. Intenta nuevamente.");
+          } finally {
+            setLoading(false);
+          }
+        });
+
+        // Función para mostrar error
+        function showError(message) {
+          errorMessage.textContent = message;
+          errorMessage.classList.remove("hidden");
+          errorMessage.classList.add("error-shake");
+
+          // Quitar animación después
+          setTimeout(() => {
+            errorMessage.classList.remove("error-shake");
+          }, 500);
+        }
+
+        // Función para mostrar/ocultar estado de carga
+        function setLoading(isLoading) {
+          if (isLoading) {
+            buttonText.textContent = "Iniciando sesión...";
+            loadingIcon.classList.remove("hidden");
+            loginButton.disabled = true;
+          } else {
+            buttonText.textContent = "Iniciar Sesión";
+            loadingIcon.classList.add("hidden");
+            loginButton.disabled = false;
+          }
+        }
+
+        // Cargar la versión de la aplicación
+        window.electronAPI
+          .getAppVersion()
+          .then((version) => {
+            document.getElementById("app-version").textContent = `v${version}`;
+          })
+          .catch(() => {
+            document.getElementById("app-version").textContent = "v1.0.0";
+          });
+      });
+    </script>
+
+    <!-- Footer con versión y créditos -->
+    <footer
+      class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-3 text-center text-sm"
+    >
+      <div class="flex justify-between items-center max-w-6xl mx-auto">
+        <div id="app-version" class="text-gray-400">v1.0.0</div>
+        <div class="text-gray-400">
+          Powered By
+          <span class="text-blue-400 font-semibold">Clicfstudios</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

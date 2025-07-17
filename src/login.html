@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Sistema de Backups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .form-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        outline: none;
+      }
+
+      .login-bg {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      .login-animation {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .error-shake {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        20%,
+        80% {
+          transform: translate3d(2px, 0, 0);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translate3d(-3px, 0, 0);
+        }
+        40%,
+        60% {
+          transform: translate3d(3px, 0, 0);
+        }
+      }
+
+      .tab-active {
+        background-color: white;
+        color: #2563eb;
+        border-bottom: 2px solid #2563eb;
+      }
+
+      .tab-inactive {
+        color: #6b7280;
+        background-color: transparent;
+        border-bottom: 2px solid transparent;
+      }
+
+      .tab-inactive:hover {
+        background-color: #f9fafb;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-50 login-bg min-h-screen flex items-center justify-center p-4 pb-20"
+  >
+    <div class="login-animation w-full max-w-md">
+      <!-- Logo y título -->
+      <div class="text-center mb-8">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 text-white mb-4"
+        >
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"
+            />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900">Sistema de Backups</h1>
+        <p class="text-gray-600 mt-2">
+          Inicia sesión para gestionar tus copias de seguridad
+        </p>
+      </div>
+
+      <!-- Tarjeta de login -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Pestañas -->
+        <div class="flex border-b border-gray-200">
+          <button
+            id="loginTab"
+            class="flex-1 py-4 px-6 text-center font-medium tab-active transition-colors"
+          >
+            Iniciar Sesión
+          </button>
+          <button
+            id="registerTab"
+            class="flex-1 py-4 px-6 text-center font-medium tab-inactive transition-colors"
+          >
+            Registrarse
+          </button>
+        </div>
+
+        <!-- Contenido de Login -->
+        <div id="loginContent" class="p-6">
+          <form id="loginForm" class="space-y-6">
+            <!-- Mensaje de error -->
+            <div
+              id="loginErrorMessage"
+              class="hidden bg-red-50 text-red-600 p-3 rounded-md text-sm"
+            ></div>
+
+            <!-- Campo de usuario -->
+            <div class="space-y-2">
+              <label
+                for="loginUsername"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Usuario o Email
+              </label>
+              <input
+                type="text"
+                id="loginUsername"
+                name="username"
+                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Ingresa tu usuario o email"
+                required
+              />
+            </div>
+
+            <!-- Campo de contraseña -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label
+                  for="loginPassword"
+                  class="block text-sm font-medium text-gray-700"
+                >
+                  Contraseña
+                </label>
+                <a
+                  href="#"
+                  class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
+              <div class="relative">
+                <input
+                  type="password"
+                  id="loginPassword"
+                  name="password"
+                  class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Ingresa tu contraseña"
+                  required
+                />
+                <button
+                  type="button"
+                  id="toggleLoginPassword"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Recordarme -->
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                name="remember"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label for="rememberMe" class="ml-2 block text-sm text-gray-700">
+                Recordar mi sesión
+              </label>
+            </div>
+
+            <!-- Botón de login -->
+            <div>
+              <button
+                type="submit"
+                id="loginButton"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <span id="loginButtonText">Iniciar Sesión</span>
+                <svg
+                  id="loginLoadingIcon"
+                  class="animate-spin ml-2 h-5 w-5 text-white hidden"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Contenido de Registro -->
+        <div id="registerContent" class="p-6 hidden">
+          <form id="registerForm" class="space-y-6">
+            <!-- Mensaje de error -->
+            <div
+              id="registerErrorMessage"
+              class="hidden bg-red-50 text-red-600 p-3 rounded-md text-sm"
+            ></div>
+
+            <!-- Campo de usuario -->
+            <div class="space-y-2">
+              <label
+                for="registerUsername"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Usuario
+              </label>
+              <input
+                type="text"
+                id="registerUsername"
+                name="username"
+                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Elige un nombre de usuario"
+                required
+              />
+            </div>
+
+            <!-- Campo de email -->
+            <div class="space-y-2">
+              <label
+                for="registerEmail"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="registerEmail"
+                name="email"
+                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Ingresa tu email"
+                required
+              />
+            </div>
+
+            <!-- Campo de contraseña -->
+            <div class="space-y-2">
+              <label
+                for="registerPassword"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Contraseña
+              </label>
+              <div class="relative">
+                <input
+                  type="password"
+                  id="registerPassword"
+                  name="password"
+                  class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Crea una contraseña"
+                  required
+                />
+                <button
+                  type="button"
+                  id="toggleRegisterPassword"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fill-rule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Confirmar contraseña -->
+            <div class="space-y-2">
+              <label
+                for="confirmPassword"
+                class="block text-sm font-medium text-gray-700"
+              >
+                Confirmar Contraseña
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Confirma tu contraseña"
+                required
+              />
+            </div>
+
+            <!-- Botón de registro -->
+            <div>
+              <button
+                type="submit"
+                id="registerButton"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <span id="registerButtonText">Crear Cuenta</span>
+                <svg
+                  id="registerLoadingIcon"
+                  class="animate-spin ml-2 h-5 w-5 text-white hidden"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-6">
+        <p class="text-sm text-gray-600">
+          © 2025 Sistema de Backups. Todos los derechos reservados.
+        </p>
+        <p class="text-xs text-gray-500 mt-1">
+          Credenciales por defecto: <strong>admin</strong> /
+          <strong>admin123</strong>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Elementos del DOM
+        const loginTab = document.getElementById("loginTab");
+        const registerTab = document.getElementById("registerTab");
+        const loginContent = document.getElementById("loginContent");
+        const registerContent = document.getElementById("registerContent");
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        // Elementos del formulario de login
+        const loginErrorMessage = document.getElementById("loginErrorMessage");
+        const loginButton = document.getElementById("loginButton");
+        const loginButtonText = document.getElementById("loginButtonText");
+        const loginLoadingIcon = document.getElementById("loginLoadingIcon");
+        const toggleLoginPassword = document.getElementById(
+          "toggleLoginPassword"
+        );
+        const loginPasswordInput = document.getElementById("loginPassword");
+
+        // Elementos del formulario de registro
+        const registerErrorMessage = document.getElementById(
+          "registerErrorMessage"
+        );
+        const registerButton = document.getElementById("registerButton");
+        const registerButtonText =
+          document.getElementById("registerButtonText");
+        const registerLoadingIcon = document.getElementById(
+          "registerLoadingIcon"
+        );
+        const toggleRegisterPassword = document.getElementById(
+          "toggleRegisterPassword"
+        );
+        const registerPasswordInput =
+          document.getElementById("registerPassword");
+
+        // Cambiar entre tabs
+        loginTab.addEventListener("click", function () {
+          switchTab("login");
+        });
+
+        registerTab.addEventListener("click", function () {
+          switchTab("register");
+        });
+
+        // Función para cambiar tabs
+        function switchTab(tab) {
+          if (tab === "login") {
+            loginTab.classList.add("tab-active");
+            loginTab.classList.remove("tab-inactive");
+            registerTab.classList.add("tab-inactive");
+            registerTab.classList.remove("tab-active");
+            loginContent.classList.remove("hidden");
+            registerContent.classList.add("hidden");
+            hideError(loginErrorMessage);
+          } else {
+            registerTab.classList.add("tab-active");
+            registerTab.classList.remove("tab-inactive");
+            loginTab.classList.add("tab-inactive");
+            loginTab.classList.remove("tab-active");
+            registerContent.classList.remove("hidden");
+            loginContent.classList.add("hidden");
+            hideError(registerErrorMessage);
+          }
+        }
+
+        // Toggle password visibility
+        toggleLoginPassword.addEventListener("click", function () {
+          togglePasswordVisibility(loginPasswordInput, toggleLoginPassword);
+        });
+
+        toggleRegisterPassword.addEventListener("click", function () {
+          togglePasswordVisibility(
+            registerPasswordInput,
+            toggleRegisterPassword
+          );
+        });
+
+        function togglePasswordVisibility(input, button) {
+          const type =
+            input.getAttribute("type") === "password" ? "text" : "password";
+          input.setAttribute("type", type);
+
+          const icon = button.querySelector("svg");
+          if (type === "text") {
+            icon.innerHTML = `<path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />`;
+          } else {
+            icon.innerHTML = `<path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />`;
+          }
+        }
+
+        // Manejo del formulario de login
+        loginForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const username = document
+            .getElementById("loginUsername")
+            .value.trim();
+          const password = loginPasswordInput.value;
+
+          if (!username || !password) {
+            showError(loginErrorMessage, "Por favor completa todos los campos");
+            return;
+          }
+
+          setLoading(true, "login");
+
+          try {
+            const result = await window.electronAPI.login(username, password);
+
+            if (result.success) {
+              // Login exitoso - navegar al panel
+              await window.electronAPI.navigateToPanel();
+            } else {
+              showError(
+                loginErrorMessage,
+                result.error || "Error en el inicio de sesión"
+              );
+            }
+          } catch (error) {
+            showError(
+              loginErrorMessage,
+              "Error de conexión. Intenta nuevamente."
+            );
+          } finally {
+            setLoading(false, "login");
+          }
+        });
+
+        // Manejo del formulario de registro
+        registerForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const username = document
+            .getElementById("registerUsername")
+            .value.trim();
+          const email = document.getElementById("registerEmail").value.trim();
+          const password = registerPasswordInput.value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          if (!username || !email || !password || !confirmPassword) {
+            showError(
+              registerErrorMessage,
+              "Por favor completa todos los campos"
+            );
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            showError(registerErrorMessage, "Las contraseñas no coinciden");
+            return;
+          }
+
+          if (password.length < 6) {
+            showError(
+              registerErrorMessage,
+              "La contraseña debe tener al menos 6 caracteres"
+            );
+            return;
+          }
+
+          setLoading(true, "register");
+
+          try {
+            const result = await window.electronAPI.register({
+              username,
+              email,
+              password,
+            });
+
+            if (result.success) {
+              // Registro exitoso - cambiar a login
+              switchTab("login");
+              showSuccess(
+                "¡Cuenta creada exitosamente! Ahora puedes iniciar sesión."
+              );
+            } else {
+              showError(
+                registerErrorMessage,
+                result.error || "Error en el registro"
+              );
+            }
+          } catch (error) {
+            showError(
+              registerErrorMessage,
+              "Error de conexión. Intenta nuevamente."
+            );
+          } finally {
+            setLoading(false, "register");
+          }
+        });
+
+        // Funciones auxiliares
+        function showError(element, message) {
+          element.textContent = message;
+          element.classList.remove("hidden");
+          element.classList.add("error-shake");
+          setTimeout(() => {
+            element.classList.remove("error-shake");
+          }, 500);
+        }
+
+        function hideError(element) {
+          element.classList.add("hidden");
+        }
+
+        function showSuccess(message) {
+          const successDiv = document.createElement("div");
+          successDiv.className =
+            "bg-green-50 text-green-600 p-3 rounded-md text-sm mb-4";
+          successDiv.textContent = message;
+          loginContent.insertBefore(successDiv, loginContent.firstChild);
+
+          setTimeout(() => {
+            successDiv.remove();
+          }, 5000);
+        }
+
+        function setLoading(isLoading, formType) {
+          if (formType === "login") {
+            if (isLoading) {
+              loginButtonText.textContent = "Iniciando sesión...";
+              loginLoadingIcon.classList.remove("hidden");
+              loginButton.disabled = true;
+            } else {
+              loginButtonText.textContent = "Iniciar Sesión";
+              loginLoadingIcon.classList.add("hidden");
+              loginButton.disabled = false;
+            }
+          } else {
+            if (isLoading) {
+              registerButtonText.textContent = "Creando cuenta...";
+              registerLoadingIcon.classList.remove("hidden");
+              registerButton.disabled = true;
+            } else {
+              registerButtonText.textContent = "Crear Cuenta";
+              registerLoadingIcon.classList.add("hidden");
+              registerButton.disabled = false;
+            }
+          }
+        }
+
+        // Verificar si ya hay una sesión activa
+        window.electronAPI.isAuthenticated().then((isAuth) => {
+          if (isAuth) {
+            window.electronAPI.navigateToPanel();
+          }
+        });
+
+        // Cargar la versión de la aplicación
+        window.electronAPI
+          .getAppVersion()
+          .then((version) => {
+            document.getElementById("app-version").textContent = `v${version}`;
+          })
+          .catch(() => {
+            document.getElementById("app-version").textContent = "v1.0.0";
+          });
+      });
+    </script>
+
+    <!-- Footer con versión y créditos -->
+    <footer
+      class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-3 text-center text-sm"
+    >
+      <div class="flex justify-between items-center max-w-6xl mx-auto">
+        <div id="app-version" class="text-gray-400">v1.0.0</div>
+        <div class="text-gray-400">
+          Powered By
+          <span class="text-blue-400 font-semibold">Clicfstudios</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
